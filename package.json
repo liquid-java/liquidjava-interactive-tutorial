@@ -1,0 +1,16 @@
+{
+  "name": "liquidjava-interactive-tutorial",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vendor:syntax": "node scripts/vendor-syntax.mjs",
+    "dev": "npm run vendor:syntax && python3 -m http.server 8000 --directory .",
+    "build": "npm run vendor:syntax && node scripts/build-site.mjs",
+    "check": "node --check app.js && node --check tutorial-data.js"
+  },
+  "dependencies": {
+    "codemirror": "5.65.21",
+    "prismjs": "1.30.0"
+  }
+}
