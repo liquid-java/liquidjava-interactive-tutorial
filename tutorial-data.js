@@ -137,7 +137,7 @@ public class BinarySearch {
 }`,
         checks: [
           {
-            pattern: "@Refinement\\s*\\(\\s*\"_\\s*>=\\s*low\\s*&&\\s*_\\s*<=\\s*high\"\\s*\\)\\s*public\\s+static\\s+int\\s+midpoint",
+            pattern: "@Refinement\\s*\\(\\s*\"(?:_\\s*>=\\s*low|low\\s*<=\\s*_)\\s*&&\\s*_\\s*<=\\s*high\"\\s*\\)\\s*public\\s+static\\s+int\\s+midpoint",
             message: "Refine the return value so it stays between low and high.",
           },
           {
