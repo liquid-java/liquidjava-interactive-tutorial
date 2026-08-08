@@ -6,6 +6,8 @@
     { id: "welcome", shortTitle: "Welcome" },
     ...content.lessons.map((lesson) => ({ id: lesson.id, shortTitle: lesson.shortTitle })),
   ];
+  const appScriptUrl = new URL(document.currentScript.src);
+  const basePath = appScriptUrl.pathname.slice(0, appScriptUrl.pathname.lastIndexOf("/") + 1);
 
   const blankState = () => ({
     currentStep: 0,
@@ -20,6 +22,28 @@
   const screen = document.querySelector("#screen");
   const navigation = document.querySelector("#step-navigation");
   const resetButton = document.querySelector("#reset-button");
+  const brandLink = document.querySelector(".brand");
+
+  function stepIndexFromPath() {
+    const relativePath = window.location.pathname.startsWith(basePath)
+      ? window.location.pathname.slice(basePath.length)
+      : "";
+    const route = decodeURIComponent(relativePath).replace(/^\/+|\/+$/g, "");
+
+    if (!route || route === "index.html" || route === "404.html") return 0;
+    return steps.findIndex((step) => step.id === route);
+  }
+
+  function pathForStep(index) {
+    const step = steps[index];
+    return step.id === "welcome" ? basePath : `${basePath}${encodeURIComponent(step.id)}`;
+  }
+
+  function updatePath(index, mode = "push") {
+    const path = pathForStep(index);
+    if (window.location.pathname === path) return;
+    window.history[`${mode}State`]({ step: steps[index].id }, "", path);
+  }
 
   function escapeHtml(value) {
     return String(value)
@@ -33,6 +57,7 @@
   function render() {
     renderNavigation();
     const step = steps[state.currentStep];
+    document.title = step.id === "welcome" ? content.meta.title : `${step.shortTitle} · ${content.meta.title}`;
     if (step.id === "welcome") renderWelcome();
     else renderLesson(content.lessons.find((lesson) => lesson.id === step.id));
     updateProgress();
@@ -350,8 +375,9 @@
     if (!state.completed.includes(stepId)) state.completed.push(stepId);
   }
 
-  function goToStep(index) {
+  function goToStep(index, historyMode = "push") {
     state.currentStep = Math.max(0, Math.min(index, steps.length - 1));
+    updatePath(state.currentStep, historyMode);
     render();
     document.querySelector("#tutorial-main").focus({ preventScroll: true });
   }
@@ -359,8 +385,23 @@
   resetButton.addEventListener("click", () => {
     if (!window.confirm("Reset this tutorial session, including edited code and answers?")) return;
     state = blankState();
-    render();
+    goToStep(0, "replace");
   });
 
+  brandLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    goToStep(0);
+  });
+
+  window.addEventListener("popstate", () => {
+    const routeIndex = stepIndexFromPath();
+    state.currentStep = routeIndex >= 0 ? routeIndex : 0;
+    render();
+    document.querySelector("#tutorial-main").focus({ preventScroll: true });
+  });
+
+  const initialRouteIndex = stepIndexFromPath();
+  state.currentStep = initialRouteIndex >= 0 ? initialRouteIndex : 0;
+  if (initialRouteIndex < 0) updatePath(0, "replace");
   render();
 })();

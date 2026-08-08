@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "vendor:syntax": "node scripts/vendor-syntax.mjs",
-    "dev": "npm run vendor:syntax && python3 -m http.server 8000 --directory .",
+    "dev": "npm run vendor:syntax && node scripts/dev-server.mjs",
     "build": "npm run vendor:syntax && node scripts/build-site.mjs",
-    "check": "node --check app.js && node --check tutorial-data.js && node scripts/validate-content.mjs"
+    "check": "node --check app.js && node --check tutorial-data.js && node --check scripts/dev-server.mjs && node --check scripts/build-site.mjs && node scripts/validate-content.mjs"
   },
   "dependencies": {
     "codemirror": "5.65.21",

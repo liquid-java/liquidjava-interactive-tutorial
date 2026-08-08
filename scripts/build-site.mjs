@@ -23,6 +23,8 @@ for (const entry of staticEntries) {
   await cp(resolve(root, entry), resolve(clientOutput, entry), { recursive: true });
 }
 
+await cp(resolve(root, "index.html"), resolve(clientOutput, "404.html"));
+
 await writeFile(
   resolve(output, "server", "index.js"),
   `export default {
