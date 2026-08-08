@@ -281,6 +281,9 @@ h1 span { color: var(--orange); }
 .workbench h2, .questions > h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -0.035em; }
 .workbench-head p:last-child { max-width: 700px; margin: 0 0 22px; color: var(--muted); }
 .editor-badge { padding: 5px 9px; color: #b6dcca; background: var(--code); border-radius: 6px; font-family: ui-monospace, monospace; font-size: 0.75rem; }
+.exercise-guide { margin: 0 0 24px; padding: clamp(14px, 2vw, 20px); background: var(--paper); border: 1px solid var(--line); border-radius: 12px; }
+.exercise-guide img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.exercise-guide figcaption { margin-top: 12px; color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
 .code-editor {
   display: block;
   width: 100%;

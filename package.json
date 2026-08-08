@@ -7,7 +7,7 @@
     "vendor:syntax": "node scripts/vendor-syntax.mjs",
     "dev": "npm run vendor:syntax && python3 -m http.server 8000 --directory .",
     "build": "npm run vendor:syntax && node scripts/build-site.mjs",
-    "check": "node --check app.js && node --check tutorial-data.js"
+    "check": "node --check app.js && node --check tutorial-data.js && node scripts/validate-content.mjs"
   },
   "dependencies": {
     "codemirror": "5.65.21",

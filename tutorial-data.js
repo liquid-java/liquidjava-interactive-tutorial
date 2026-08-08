@@ -192,6 +192,13 @@ public class LightBulb {
         title: "Complete the socket transitions",
         prompt:
           "Replace the true refinements so bind, connect, sendUrgentData, and close follow the socket protocol.",
+        guide: {
+          image: "images/socket_dfa.png?v=20260809",
+          alt:
+            "Socket protocol diagram. A socket starts unconnected; bind moves it to bound; connect moves it to connected; sendUrgentData keeps it connected; and close moves any non-closed socket to closed.",
+          caption:
+            "Follow each arrow from its source state to its target state. For the sendUrgentData loop, a from-only refinement requires connected and leaves the socket connected.",
+        },
         starterCode: `import java.net.SocketAddress;
 import liquidjava.specification.ExternalRefinementsFor;
 import liquidjava.specification.StateRefinement;
@@ -209,7 +216,7 @@ public interface SocketRefinements {
     @StateRefinement(from="true", to="true")
     public void connect(SocketAddress add);
 
-    @StateRefinement(from="true", to="true")
+    @StateRefinement(from="true")
     public void sendUrgentData(int n);
 
     @StateRefinement(from="true", to="true")
@@ -232,7 +239,7 @@ public interface SocketRefinements {
     @StateRefinement(from="bound(this)", to="connected(this)")
     public void connect(SocketAddress add);
 
-    @StateRefinement(from="connected(this)", to="closed(this)")
+    @StateRefinement(from="connected(this)")
     public void sendUrgentData(int n);
 
     @StateRefinement(from="!closed(this)", to="closed(this)")
@@ -248,8 +255,8 @@ public interface SocketRefinements {
             message: "connect should move the socket from bound to connected.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"connected\\(this\\)\"\\s*,\\s*to\\s*=\\s*\"closed\\(this\\)\"\\s*\\)\\s*public\\s+void\\s+sendUrgentData",
-            message: "sendUrgentData should move a connected socket to closed.",
+            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"connected\\(this\\)\"\\s*(?:,\\s*to\\s*=\\s*\"connected\\(this\\)\"\\s*)?\\)\\s*public\\s+void\\s+sendUrgentData",
+            message: "sendUrgentData should require a connected socket and leave it connected.",
           },
           {
             pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"!closed\\(this\\)\"\\s*,\\s*to\\s*=\\s*\"closed\\(this\\)\"\\s*\\)\\s*public\\s+void\\s+close",
@@ -271,12 +278,13 @@ public interface SocketRefinements {
           type: "radio",
           prompt: "Which sequence follows the protocol?",
           choices: [
-            "Socket(); bind(); connect(); close();",
+            "Socket(); bind(); connect(); sendUrgentData(1); close();",
             "Socket(); connect(); bind();",
             "Socket(); bind(); bind();",
           ],
           correct: 0,
-          explanation: "A socket starts unconnected, then moves through bound and connected before closing.",
+          explanation:
+            "After bind and connect, sendUrgentData is allowed and leaves the socket connected, so close is still valid.",
         },
       ],
     },

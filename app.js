@@ -137,6 +137,14 @@
             </div>
             <span class="editor-badge">Java</span>
           </div>
+          ${
+            lesson.exercise.guide
+              ? `<figure class="exercise-guide">
+                  <img src="${escapeHtml(lesson.exercise.guide.image)}" alt="${escapeHtml(lesson.exercise.guide.alt)}" loading="lazy" decoding="async" />
+                  <figcaption>${escapeHtml(lesson.exercise.guide.caption)}</figcaption>
+                </figure>`
+              : ""
+          }
           <label class="sr-only" for="code-${lesson.id}">Editable Java exercise</label>
           <textarea id="code-${lesson.id}" class="code-editor" spellcheck="false" aria-describedby="exercise-feedback-${lesson.id}">${escapeHtml(currentCode)}</textarea>
           <div class="editor-actions">
