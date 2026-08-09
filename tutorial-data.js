@@ -40,7 +40,7 @@ window.LIQUID_JAVA_TUTORIAL = {
           "Add a refinement that limits red to 0–255, then replace the invalid value with any value that satisfies it.",
         starterCode: `import liquidjava.specification.Refinement;
 
-public class Pixel {
+public class RGB {
     public static void main(String[] args) {
         // Add the RGB channel refinement here
         int red = 300;
@@ -48,7 +48,7 @@ public class Pixel {
 }`,
         solutionCode: `import liquidjava.specification.Refinement;
 
-public class Pixel {
+public class RGB {
     public static void main(String[] args) {
         @Refinement("_ >= 0 && _ <= 255")
         int red = 220;
@@ -115,7 +115,7 @@ public static int divide(
           "Replace both true refinements: low must be no greater than high, and the return value must stay between the two bounds.",
         starterCode: `import liquidjava.specification.Refinement;
 
-public class BinarySearch {
+public class Midpoint {
     @Refinement("true")
     public static int midpoint(
         @Refinement("true") int low,
@@ -126,7 +126,7 @@ public class BinarySearch {
 }`,
         solutionCode: `import liquidjava.specification.Refinement;
 
-public class BinarySearch {
+public class Midpoint {
     @Refinement("_ >= low && _ <= high")
     public static int midpoint(
         @Refinement("_ <= high") int low,
