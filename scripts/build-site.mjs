@@ -9,6 +9,7 @@ const staticEntries = [
   "index.html",
   "app.js",
   "tutorial-data.js",
+  "validation-regexes.js",
   "styles.css",
   "images",
   "vendor",

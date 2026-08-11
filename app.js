@@ -1,12 +1,14 @@
+import { tutorial } from "./tutorial-data.js";
+
 (function () {
   "use strict";
 
-  const content = window.LIQUID_JAVA_TUTORIAL;
+  const content = tutorial;
   const steps = [
     { id: "welcome", shortTitle: "Welcome" },
     ...content.lessons.map((lesson) => ({ id: lesson.id, shortTitle: lesson.shortTitle })),
   ];
-  const appScriptUrl = new URL(document.currentScript.src);
+  const appScriptUrl = new URL(import.meta.url);
   const basePath = appScriptUrl.pathname.slice(0, appScriptUrl.pathname.lastIndexOf("/") + 1);
 
   const blankState = () => ({

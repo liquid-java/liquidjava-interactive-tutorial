@@ -1,15 +1,9 @@
-import { access, readFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import vm from "node:vm";
+import { tutorial } from "../tutorial-data.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const source = await readFile(resolve(root, "tutorial-data.js"), "utf8");
-const sandbox = { window: {} };
-
-vm.runInNewContext(source, sandbox, { filename: "tutorial-data.js" });
-
-const tutorial = sandbox.window.LIQUID_JAVA_TUTORIAL;
 const failures = [];
 
 if (!tutorial?.lessons?.length) {

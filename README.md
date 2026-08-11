@@ -21,7 +21,7 @@ Then open `http://localhost:8000`.
 
 ## Examples
 
-All tutorial content is in [`tutorial-data.js`](tutorial-data.js). The interface renders the lessons from that single configuration object.
+All tutorial content is in [`tutorial-data.js`](tutorial-data.js). The interface renders the lessons from that single configuration object. Reusable exercise checks are centralized in [`validation-regexes.js`](validation-regexes.js).
 
 Each lesson contains:
 

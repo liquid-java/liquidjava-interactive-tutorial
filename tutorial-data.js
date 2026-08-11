@@ -1,3 +1,5 @@
+import { validationRegexes } from "./validation-regexes.js";
+
 /*
  * TUTORIAL CONTENT LIVES HERE
  * ---------------------------
@@ -7,7 +9,7 @@
  * Exercise checks are JavaScript regular expressions stored as strings. They are
  * intentionally tolerant of spacing so learners can format Java naturally.
  */
-window.LIQUID_JAVA_TUTORIAL = {
+export const tutorial = {
   meta: {
     title: "LiquidJava Interactive Tutorial",
     eyebrow: "A hands-on interactive tutorial",
@@ -56,11 +58,11 @@ public class RGB {
 }`,
         checks: [
           {
-            pattern: "@Refinement\\s*\\(\\s*\"(?:(?:_|red)\\s*>=\\s*0\\s*&&\\s*(?:_|red)\\s*<=\\s*255|0\\s*<=\\s*(?:_|red)\\s*&&\\s*(?:_|red)\\s*<=\\s*255)\"\\s*\\)",
+            pattern: validationRegexes.rgb.refinement,
             message: "Add a boolean refinement that includes every integer from 0 to 255.",
           },
           {
-            pattern: "int\\s+red\\s*=\\s*(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\s*;",
+            pattern: validationRegexes.rgb.assignment,
             message: "Choose a red-channel value between 0 and 255.",
           },
         ],
@@ -137,11 +139,11 @@ public class Midpoint {
 }`,
         checks: [
           {
-            pattern: "@Refinement\\s*\\(\\s*\"(?:_\\s*>=\\s*low|low\\s*<=\\s*_)\\s*&&\\s*_\\s*<=\\s*high\"\\s*\\)\\s*public\\s+static\\s+int\\s+midpoint",
+            pattern: validationRegexes.midpoint.result,
             message: "Refine the return value so it stays between low and high.",
           },
           {
-            pattern: "@Refinement\\s*\\(\\s*\"_\\s*<=\\s*high\"\\s*\\)\\s*int\\s+low",
+            pattern: validationRegexes.midpoint.bounds,
             message: "Require low to be less than or equal to high.",
           },
         ],
@@ -250,19 +252,19 @@ public interface SocketRefinements {
 }`,
         checks: [
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"unconnected\\(this\\)\"\\s*,\\s*to\\s*=\\s*\"bound\\(this\\)\"\\s*\\)\\s*public\\s+void\\s+bind",
+            pattern: validationRegexes.socket.bind,
             message: "bind should move the socket from unconnected to bound.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"bound\\(this\\)\"\\s*,\\s*to\\s*=\\s*\"connected\\(this\\)\"\\s*\\)\\s*public\\s+void\\s+connect",
+            pattern: validationRegexes.socket.connect,
             message: "connect should move the socket from bound to connected.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"connected\\(this\\)\"\\s*(?:,\\s*to\\s*=\\s*\"connected\\(this\\)\"\\s*)?\\)\\s*public\\s+void\\s+sendUrgentData",
+            pattern: validationRegexes.socket.sendUrgentData,
             message: "sendUrgentData should require a connected socket and leave it connected.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"!closed\\(this\\)\"\\s*,\\s*to\\s*=\\s*\"closed\\(this\\)\"\\s*\\)\\s*public\\s+void\\s+close",
+            pattern: validationRegexes.socket.close,
             message: "close should accept any non-closed socket and leave it closed.",
           },
         ],
@@ -364,19 +366,19 @@ public interface StackRefinements<E> {
 }`,
         checks: [
           {
-            pattern: "@StateRefinement\\s*\\(\\s*to\\s*=\\s*\"size\\(this\\)\\s*==\\s*0\"\\s*\\)\\s*public\\s+void\\s+Stack",
+            pattern: validationRegexes.stack.constructor,
             message: "The constructor should initialize size(this) to 0.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*to\\s*=\\s*\"size\\(this\\)\\s*==\\s*size\\(old\\(this\\)\\)\\s*\\+\\s*1\"\\s*\\)\\s*public\\s+E\\s+push",
+            pattern: validationRegexes.stack.push,
             message: "push should increase the previous size by one.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"size\\(this\\)\\s*>\\s*0\"\\s*,\\s*to\\s*=\\s*\"size\\(this\\)\\s*==\\s*size\\(old\\(this\\)\\)\\s*-\\s*1\"\\s*\\)\\s*public\\s+E\\s+pop",
+            pattern: validationRegexes.stack.pop,
             message: "pop should require a non-empty stack and decrease size by one.",
           },
           {
-            pattern: "@StateRefinement\\s*\\(\\s*from\\s*=\\s*\"size\\(this\\)\\s*>\\s*0\"\\s*\\)\\s*public\\s+E\\s+peek",
+            pattern: validationRegexes.stack.peek,
             message: "peek should require size(this) to be greater than zero.",
           },
         ],
@@ -403,3 +405,5 @@ public interface StackRefinements<E> {
     },
   ],
 };
+
+if (typeof window !== "undefined") window.LIQUID_JAVA_TUTORIAL = tutorial;
