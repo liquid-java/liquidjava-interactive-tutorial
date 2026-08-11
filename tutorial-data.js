@@ -42,7 +42,7 @@ window.LIQUID_JAVA_TUTORIAL = {
 
 public class RGB {
     public static void main(String[] args) {
-        // Add the RGB channel refinement here
+        // Add the RGB refinement here
         int red = 300;
     }
 }`,
@@ -94,12 +94,12 @@ public class RGB {
         "Method refinements describe which calls are valid and what the implementation promises about its result.",
       concept: {
         label: "Inputs and outputs",
-        code: `@Refinement("_ == numerator / denominator")
+        code: `@Refinement("_ == x / y")
 public static int divide(
-    int numerator,
-    @Refinement("_ != 0") int denominator
+    int x,
+    @Refinement("_ != 0") int y
 ) {
-    return numerator / denominator;
+    return x / y;
 }`,
         explanation:
           "The parameter contract prevents division by zero. The return contract connects the result to the two inputs.",
@@ -177,6 +177,9 @@ public class Midpoint {
         label: "Follow the transition",
         code: `@StateSet({"off", "on"})
 public class LightBulb {
+    @StateRefinement(to="off(this)")
+    public void LightBulb() { } // Constructor
+
     @StateRefinement(from="off(this)", to="on(this)")
     public void turnOn() { }
 }`,
@@ -208,7 +211,7 @@ import liquidjava.specification.StateSet;
 @StateSet({"unconnected", "bound", "connected", "closed"})
 public interface SocketRefinements {
     @StateRefinement(to="unconnected(this)")
-    public void Socket();
+    public void Socket(); // Constructor
 
     @StateRefinement(from="true", to="true")
     public void bind(SocketAddress add);
@@ -301,7 +304,12 @@ public interface SocketRefinements {
         code: `@ExternalRefinementsFor("java.util.ArrayList")
 @Ghost("int size")
 public interface ArrayListRefinements<E> {
-    @StateRefinement(to="size(this) == size(old(this)) + 1")
+    @StateRefinement(to="size(this) == 0")
+    public void ArrayList(); // Constructor
+
+    @StateRefinement(
+      to="size(this) == size(old(this)) + 1"
+    )
     public boolean add(E element);
 }`,
         explanation:
@@ -324,7 +332,7 @@ import liquidjava.specification.StateRefinement;
 @Ghost("int size")
 public interface StackRefinements<E> {
     @StateRefinement(to="true")
-    public void Stack();
+    public void Stack(); // Constructor
 
     @StateRefinement(to="true")
     public E push(E elem);
