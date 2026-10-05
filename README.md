@@ -7,11 +7,11 @@ This repository contains a web-based, interactive introduction to LiquidJava. Th
 3. External socket state refinements;
 4. Stack ghost variables.
 
-Learners can edit Java snippets, run lightweight in-browser checks, answer quick knowledge questions, and move freely between sections. The tutorial does not collect, persist, or export user data.
+Learners can edit Java snippets, run LiquidJava verification in the browser, answer quick knowledge questions, and move freely between sections. The tutorial does not collect, persist, or export user data.
 
 ## Preview Locally
 
-Run the local development server:
+Build and export the shared runtime as described below, then run the local development server:
 
 ```sh
 npm run dev
@@ -27,11 +27,24 @@ Each lesson contains:
 
 - Explanatory copy and a read-only example;
 - Starter and solution code;
-- Regular-expression checks for the coding task;
+- A Java filename and exercise-pattern hints for the coding task;
 - Automatically checked multiple-choice and short-answer questions.
 
 Add, remove, or reorder lesson objects to change the tutorial without editing `app.js` or `index.html`.
 
 ## Checker Scope
 
-The browser checker is intentionally lightweight: it recognizes the requested annotations and values but does not run the LiquidJava compiler. Use the LiquidJava VS Code extension for real verification tasks.
+Checks run the real LiquidJava verifier locally in a browser worker. Results show diagnostic titles and messages. Exercise-pattern hints are separate from verification: valid Java with a missing requested contract is reported as “Exercise incomplete”. Editing, resetting, or leaving a lesson cancels pending verification.
+
+Before development or building, build the shared runtime in the adjacent `liquidjava-docs` checkout with JDK 17, then export it here:
+
+```sh
+cd ../liquidjava-docs
+npm ci
+npm run build:playground
+node scripts/playground/export.mjs ../liquidjava-interactive-tutorial
+cd ../liquidjava-interactive-tutorial
+npm run dev
+```
+
+The workflow builds and exports the runtime from a pinned docs commit, validates pull requests, and deploys only from `main`. Update the checkout `ref` after testing a shared-runtime upgrade. Serve over HTTPS (or localhost) with HTTP range support; `npm run dev` supports JAR range requests. The isolation service worker reloads once before mounting the tutorial. The verifier downloads only when you first check an exercise; Stop terminates it. No source code is sent to a verification server.

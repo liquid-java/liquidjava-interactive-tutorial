@@ -11,6 +11,8 @@ const mimeTypes = {
   ".gif": "image/gif",
   ".html": "text/html; charset=utf-8",
   ".ico": "image/x-icon",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".wasm": "application/wasm",
   ".js": "text/javascript; charset=utf-8",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -56,7 +58,27 @@ const server = createServer(async (request, response) => {
     }
   }
 
+  const range = request.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
+  if (range) {
+    const start = Number(range[1]);
+    const end = Math.min(range[2] ? Number(range[2]) : file.size - 1, file.size - 1);
+    if (start > end || start >= file.size) {
+      response.writeHead(416, { "Content-Range": `bytes */${file.size}` }).end();
+      return;
+    }
+    response.writeHead(206, {
+      "Content-Type": mimeTypes[extname(target).toLowerCase()] || "application/octet-stream",
+      "Content-Range": `bytes ${start}-${end}/${file.size}`,
+      "Content-Length": end - start + 1,
+      "Accept-Ranges": "bytes",
+    });
+    if (request.method === "HEAD") response.end();
+    else createReadStream(target, { start, end }).pipe(response);
+    return;
+  }
   response.writeHead(200, {
+    "Accept-Ranges": "bytes",
+    "Content-Length": file.size,
     "Cache-Control": "no-store",
     "Content-Type": mimeTypes[extname(target).toLowerCase()] || "application/octet-stream",
   });

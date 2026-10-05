@@ -13,6 +13,8 @@ const staticEntries = [
   "styles.css",
   "images",
   "vendor",
+  "verifier",
+  "isolation.js",
 ];
 
 await access(resolve(root, "index.html"));

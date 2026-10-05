@@ -37,6 +37,7 @@ export const tutorial = {
         ],
       },
       exercise: {
+        filename: "RGB.java",
         title: "Repair the red channel",
         prompt:
           "Add a refinement that limits red to 0–255, then replace the invalid value with any value that satisfies it.",
@@ -112,6 +113,7 @@ public static int divide(
         ],
       },
       exercise: {
+        filename: "Midpoint.java",
         title: "Complete the midpoint contract",
         prompt:
           "Replace both true refinements: low must be no greater than high, and the return value must stay between the two bounds.",
@@ -194,6 +196,7 @@ public class LightBulb {
         ],
       },
       exercise: {
+        filename: "SocketRefinements.java",
         title: "Complete the socket transitions",
         prompt:
           "Replace the true refinements so bind, connect, sendUrgentData, and close follow the socket protocol.",
@@ -323,6 +326,7 @@ public interface ArrayListRefinements<E> {
         ],
       },
       exercise: {
+        filename: "StackRefinements.java",
         title: "Complete the stack refinements",
         prompt:
           "Replace the true refinements so the constructor, push, pop, and peek maintain and check the size ghost variable.",

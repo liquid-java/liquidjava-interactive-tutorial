@@ -4,15 +4,14 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event.pull_request.number || 'deploy' }}
   cancel-in-progress: true
 
 jobs:
@@ -29,6 +28,27 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Check out shared browser verifier
+        uses: actions/checkout@v4
+        with:
+          repository: liquid-java/liquidjava-docs
+          ref: 7b61cdde7010b06629c4cdaf298e5b54daba4f63
+          path: .browser-source
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build shared browser verifier
+        working-directory: .browser-source
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build:playground
+          npm run test:playground
+          node scripts/playground/export.mjs ..
+
       - name: Install dependencies
         run: npm ci
 
@@ -37,21 +57,26 @@ jobs:
           npm run check
           npm run build
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist/client
 
   deploy:
+    if: github.event_name != 'pull_request'
+    permissions:
+      pages: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

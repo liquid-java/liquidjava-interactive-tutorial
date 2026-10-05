@@ -12,6 +12,9 @@ if (!tutorial?.lessons?.length) {
 
 for (const lesson of tutorial?.lessons ?? []) {
   const label = lesson.id || "unnamed lesson";
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*\.java$/.test(lesson.exercise?.filename || "")) {
+    failures.push(`${label}: exercise needs a Java filename.`);
+  }
 
   for (const check of lesson.exercise?.checks ?? []) {
     if (!new RegExp(check.pattern, "m").test(lesson.exercise.solutionCode)) {
