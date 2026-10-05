@@ -1,4 +1,8 @@
 import { tutorial } from "./tutorial-data.js";
+import { BrowserVerifier, prepareVerifier } from "./verifier/client.mjs";
+
+let preparationError;
+try { await prepareVerifier(); } catch (error) { preparationError = error.message; }
 
 (function () {
   "use strict";
@@ -20,6 +24,8 @@ import { tutorial } from "./tutorial-data.js";
   });
 
   let state = blankState();
+  const verifier = new BrowserVerifier();
+  let checkToken = 0;
 
   const screen = document.querySelector("#screen");
   const navigation = document.querySelector("#step-navigation");
@@ -57,6 +63,8 @@ import { tutorial } from "./tutorial-data.js";
   }
 
   function render() {
+    checkToken++;
+    if (verifier.pending) verifier.cancel();
     renderNavigation();
     const step = steps[state.currentStep];
     document.title = step.id === "welcome" ? content.meta.title : `${step.shortTitle} · ${content.meta.title}`;
@@ -162,7 +170,7 @@ import { tutorial } from "./tutorial-data.js";
               <h2 id="exercise-title-${lesson.id}">${escapeHtml(lesson.exercise.title)}</h2>
               <p>${escapeHtml(lesson.exercise.prompt)}</p>
             </div>
-            <span class="editor-badge">Java</span>
+            <span class="editor-badge">${escapeHtml(lesson.exercise.filename)}</span>
           </div>
           ${
             lesson.exercise.guide
@@ -203,16 +211,15 @@ import { tutorial } from "./tutorial-data.js";
   }
 
   function renderExerciseFeedback(result) {
-    if (!result) return "<p>Run the check when you are ready. This checker looks for the contract, not exact formatting.</p>";
-    if (result.passed) {
-      return '<p><strong>Contract satisfied.</strong> Your annotations express the requested guarantee.</p>';
-    }
-    return `<p><strong>Almost there.</strong></p><ul>${result.messages.map((message) => `<li>${escapeHtml(message)}</li>`).join("")}</ul>`;
+    if (!result) return "<p>Check your Java code and refinements in your browser.</p>";
+    return result.diagnostics.map(({ title, message }) =>
+      `<p><strong>${escapeHtml(title)}</strong><br>${escapeHtml(message)}</p>`).join("");
   }
 
   function wireLesson(lesson) {
     const textarea = document.querySelector(`#code-${lesson.id}`);
     const feedback = document.querySelector(`#exercise-feedback-${lesson.id}`);
+    const checkButton = document.querySelector(`#check-${lesson.id}`);
     const solutionButton = document.querySelector(`#solution-${lesson.id}`);
     const solutionPanel = document.querySelector(`#solution-panel-${lesson.id}`);
 
@@ -250,6 +257,9 @@ import { tutorial } from "./tutorial-data.js";
     const focusEditor = () => (editor ? editor.focus() : textarea.focus());
 
     const handleCodeChange = () => {
+      checkToken++;
+      if (verifier.pending) verifier.cancel();
+      checkButton.textContent = "Check my work";
       state.code[lesson.id] = getCode();
       delete state.checkResults[lesson.id];
       feedback.className = "exercise-feedback";
@@ -259,13 +269,41 @@ import { tutorial } from "./tutorial-data.js";
     if (editor) editor.on("change", handleCodeChange);
     else textarea.addEventListener("input", handleCodeChange);
 
-    document.querySelector(`#check-${lesson.id}`).addEventListener("click", () => {
-      const failures = lesson.exercise.checks.filter((check) => !new RegExp(check.pattern, "m").test(getCode()));
-      const result = { passed: failures.length === 0, messages: failures.map((check) => check.message) };
-      state.checkResults[lesson.id] = result;
-      feedback.className = `exercise-feedback ${result.passed ? "is-success" : "is-error"}`;
-      feedback.innerHTML = renderExerciseFeedback(result);
-      feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    checkButton.addEventListener("click", async () => {
+      if (verifier.pending) {
+        checkToken++;
+        verifier.cancel();
+        checkButton.textContent = "Check my work";
+        feedback.className = "exercise-feedback";
+        feedback.innerHTML = renderExerciseFeedback({ diagnostics: [{ title: "Verification stopped", message: "Check again when you are ready." }] });
+        return;
+      }
+      const token = ++checkToken;
+      const code = getCode();
+      checkButton.textContent = "Stop";
+      feedback.className = "exercise-feedback";
+      try {
+        if (preparationError) throw new Error(preparationError);
+        const result = await verifier.verify({ [lesson.exercise.filename]: code }, message => {
+          if (token === checkToken) feedback.textContent = message;
+        });
+        if (token !== checkToken) return;
+        // exercise hints describe the requested contract, independently of verification
+        if (result.status === "success") {
+          const missing = lesson.exercise.checks.filter(check => !new RegExp(check.pattern, "m").test(code));
+          if (missing.length) result.diagnostics.push({ title: "Exercise incomplete", message: missing.map(check => check.message).join(" ") });
+          result.passed = missing.length === 0;
+        }
+        state.checkResults[lesson.id] = result;
+        feedback.className = `exercise-feedback ${result.passed ? "is-success" : "is-error"}`;
+        feedback.innerHTML = renderExerciseFeedback(result);
+      } catch (error) {
+        if (token !== checkToken || error.name === "AbortError") return;
+        feedback.className = "exercise-feedback is-error";
+        feedback.innerHTML = renderExerciseFeedback({ diagnostics: [{ title: "Verification could not complete", message: error.message }] });
+      } finally {
+        if (token === checkToken) checkButton.textContent = "Check my work";
+      }
     });
 
     document.querySelector(`#reset-${lesson.id}`).addEventListener("click", () => {
